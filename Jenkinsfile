@@ -14,11 +14,18 @@ pipeline {
         }
 
         stage('Build') {
-            steps {
-                sh 'echo JAVA_HOME=$JAVA_HOME'
-                sh 'java -version'
-                sh 'mvn -version'
-                sh 'mvn clean package'
+    steps {
+        sh '''
+            echo "JAVA_HOME=$JAVA_HOME"
+            ls -ld "$JAVA_HOME"
+            "$JAVA_HOME/bin/java" -version
+            mvn -version
+        '''
+            }
+        }  
+           
+            
+           
             }
         }
 
