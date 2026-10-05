@@ -1,4 +1,3 @@
-```groovy
 pipeline {
 
     agent {
@@ -50,15 +49,10 @@ pipeline {
                     usernameVariable: 'DOCKER_USERNAME',
                     passwordVariable: 'DOCKER_PASSWORD'
                 )]) {
-
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-
-                        docker tag jenkins-demo-app:${BUILD_NUMBER} \
-                            $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
-
+                        docker tag jenkins-demo-app:${BUILD_NUMBER} $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
                         docker push $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
-
                         docker logout
                     '''
                 }
@@ -66,4 +60,3 @@ pipeline {
         }
     }
 }
-```
