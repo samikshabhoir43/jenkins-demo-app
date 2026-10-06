@@ -4,15 +4,15 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class HelloControllerTest {
+class HelloControllerTest {
 
     @Test
     void helloTest() {
 
         HelloController controller = new HelloController();
 
-        String response = controller.hello();
+        String result = controller.hello();
 
-        assertEquals("Hello from Jenkins CI/CD!", response);
+        assertEquals("Hello from Jenkins CI/CD  - version 2!", result);
     }
 }
