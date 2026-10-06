@@ -51,11 +51,60 @@ pipeline {
                 )]) {
                     sh '''
                         echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-                        docker tag jenkins-demo-app:${BUILD_NUMBER} $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
-                        docker push $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
+
+                        docker tag jenkins-demo-app:${BUILD_NUMBER} \
+                        $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
+
+                        docker push \
+                        $DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
+
                         docker logout
                     '''
                 }
+            }
+        }
+
+        stage('Kubernetes Deploy') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
+                    sh '''
+                        export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+                        kubectl apply -f k8s/deployment.yaml
+                        kubectl apply -f k8s/service.yaml
+
+                        kubectl set image deployment/jenkins-demo-app \
+                        jenkins-demo-app=$DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
+
+                        kubectl rollout status deployment/jenkins-demo-app
+                    '''
+                }
+            }
+        }
+
+        stage('Health Check') {
+            steps {
+                sh '''
+                    export KUBECONFIG=/var/lib/jenkins/.kube/config
+
+                    echo "Checking Pod status..."
+                    kubectl get pods -l app=jenkins-demo-app
+
+                    echo "Checking Service..."
+                    kubectl get svc jenkins-demo-app
+
+                    echo "Checking application..."
+                    POD=$(kubectl get pods -l app=jenkins-demo-app \
+                        -o jsonpath='{.items[0].metadata.name}')
+
+                    kubectl exec "$POD" -- curl -f http://localhost:8080/hello
+
+                    echo "Health check successful!"
+                '''
             }
         }
     }
