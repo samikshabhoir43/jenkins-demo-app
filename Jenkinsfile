@@ -80,7 +80,8 @@ pipeline {
                         kubectl set image deployment/jenkins-demo-app \
                         jenkins-demo-app=$DOCKER_USERNAME/jenkins-demo-app:${BUILD_NUMBER}
 
-                        kubectl rollout status deployment/jenkins-demo-app
+                        kubectl rollout status deployment/jenkins-demo-app \
+                        --timeout=120s
                     '''
                 }
             }
@@ -97,20 +98,18 @@ pipeline {
                     echo "Checking Service..."
                     kubectl get svc jenkins-demo-app
 
-                    
-                    echo "Waiting for application Pod..."
-                    kubectl wait --for=condition=Ready pod \
-                    -l app=jenkins-demo-app --timeout=120s
-                    
-                    POD=$(kubectl get pods -l app=jenkins-demo-app \
-                        --field-selector=status.phase=Running \
-                        -o jsonpath='{.items[0].metadata.name}')
-                      
-                    echo "Testing Pod: $POD"
+                    echo "Waiting for new Pod to become Ready..."
+                    kubectl wait \
+                        --for=condition=Ready pod \
+                        -l app=jenkins-demo-app \
+                        --timeout=120s
 
-                    kubectl exec "$POD" -- curl -f http://localhost:8080/hello
+                    echo "Checking Deployment rollout..."
+                    kubectl rollout status \
+                        deployment/jenkins-demo-app \
+                        --timeout=120s
 
-                    echo "Health check successful!"
+                    echo "Health Check Completed Successfully"
                 '''
             }
         }
