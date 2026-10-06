@@ -97,9 +97,16 @@ pipeline {
                     echo "Checking Service..."
                     kubectl get svc jenkins-demo-app
 
-                    echo "Checking application..."
+                    
+                    echo "Waiting for application Pod..."
+                    kubectl wait --for=condition=Ready pod \
+                    -l app=jenkins-demo-app --timeout=120s
+                    
                     POD=$(kubectl get pods -l app=jenkins-demo-app \
+                        --field-selector=status.phase=Running \
                         -o jsonpath='{.items[0].metadata.name}')
+                      
+                    echo "Testing Pod: $POD"
 
                     kubectl exec "$POD" -- curl -f http://localhost:8080/hello
 
