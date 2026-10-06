@@ -92,24 +92,34 @@ pipeline {
                 sh '''
                     export KUBECONFIG=/var/lib/jenkins/.kube/config
 
-                    echo "Checking Pod status..."
+                    echo "======================================"
+                    echo "Checking Deployment..."
+                    echo "======================================"
+
+                    kubectl rollout status deployment/jenkins-demo-app \
+                        --timeout=120s
+
+                    echo "======================================"
+                    echo "Checking Pods..."
+                    echo "======================================"
+
                     kubectl get pods -l app=jenkins-demo-app
 
+                    echo "======================================"
                     echo "Checking Service..."
+                    echo "======================================"
+
                     kubectl get svc jenkins-demo-app
 
-                    echo "Waiting for new Pod to become Ready..."
-                    kubectl wait \
-                        --for=condition=Ready pod \
-                        -l app=jenkins-demo-app \
-                        --timeout=120s
+                    echo "======================================"
+                    echo "Checking Deployment Replicas..."
+                    echo "======================================"
 
-                    echo "Checking Deployment rollout..."
-                    kubectl rollout status \
-                        deployment/jenkins-demo-app \
-                        --timeout=120s
+                    kubectl get deployment jenkins-demo-app
 
+                    echo "======================================"
                     echo "Health Check Completed Successfully"
+                    echo "======================================"
                 '''
             }
         }
