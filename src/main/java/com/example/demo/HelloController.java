@@ -8,6 +8,6 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String hello() {
-        return "Hello from Jenkins CI/CD  - version 2!";
+        return "Hello from Jenkins CI/CD  - version 3!";
     }
 }

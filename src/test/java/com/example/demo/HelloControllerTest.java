@@ -13,6 +13,6 @@ class HelloControllerTest {
 
         String result = controller.hello();
 
-        assertEquals("Hello from Jenkins CI/CD  - version 2!", result);
+        assertEquals("Hello from Jenkins CI/CD  - version 3!", result);
     }
 }
